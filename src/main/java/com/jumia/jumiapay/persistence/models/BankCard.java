@@ -31,4 +31,6 @@ public class BankCard implements Serializable {
     private String type;
 
     private String bank;
+
+    private long totalRequest = 1;
 }

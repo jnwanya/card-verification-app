@@ -1,6 +1,7 @@
 package com.jumia.jumiapay.persistence.service;
 
 import com.jumia.jumiapay.persistence.models.BankCard;
+import org.springframework.data.domain.Page;
 
 import java.util.Optional;
 
@@ -11,4 +12,6 @@ import java.util.Optional;
 public interface BankCardService extends CrudService<BankCard, Long> {
 
     Optional<BankCard> findBankCardByCardNumber(String cardNumber);
+
+    Page<BankCard> getBankCards(int startIndex, int size);
 }

@@ -8,14 +8,17 @@ import com.jumia.jumiapay.web.exceptions.BadRequestException;
 import com.jumia.jumiapay.web.exceptions.NotFoundException;
 import com.jumia.jumiapay.web.pojo.Bank;
 import com.jumia.jumiapay.web.pojo.CardResolutionResponse;
+import com.jumia.jumiapay.web.pojo.response.BankCardStatResponse;
 import com.jumia.jumiapay.web.util.RestServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -57,6 +60,9 @@ public class CardManagementServiceImpl implements CardManagementService {
 
         Optional<BankCard> bankCardOptional = bankCardService.findBankCardByCardNumber(cardNumber);
         if(bankCardOptional.isPresent()){
+            BankCard bankCard = bankCardOptional.get();
+            bankCard.setTotalRequest(bankCard.getTotalRequest() + 1);
+            bankCardService.saveRecord(bankCard);
             return from(bankCardOptional.get());
         }
 
@@ -78,8 +84,27 @@ public class CardManagementServiceImpl implements CardManagementService {
         bankCard.setCardNumber(cardNumber);
         bankCard.setScheme(scheme);
         bankCard.setType(type);
+        bankCard.setTotalRequest(1);
         bankCard = bankCardService.saveRecord(bankCard);
         return from(bankCard);
+    }
+
+    @Override
+    public BankCardStatResponse getBankCardStatistics(int start, int limit) {
+
+        Page<BankCard> bankCardPage = bankCardService.getBankCards(start, limit);
+        long size = bankCardPage.getTotalElements();
+        HashMap<String, Long> statMap = new HashMap<>();
+        bankCardPage.get().forEach(bankCard -> statMap.put(bankCard.getCardNumber(), bankCard.getTotalRequest()));
+        String payload = statMap.toString();
+        System.out.println(payload);
+        BankCardStatResponse statResponse = new BankCardStatResponse();
+        statResponse.setLimit(limit);
+        statResponse.setPayload(statMap);
+        statResponse.setSize(size);
+        statResponse.setStart(start);
+        statResponse.setSuccess(true);
+        return statResponse;
     }
 
 

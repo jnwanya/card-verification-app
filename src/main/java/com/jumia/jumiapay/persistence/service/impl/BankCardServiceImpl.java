@@ -4,6 +4,9 @@ import com.jumia.jumiapay.persistence.models.BankCard;
 import com.jumia.jumiapay.persistence.repository.BankCardRepository;
 import com.jumia.jumiapay.persistence.service.BankCardService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -40,5 +43,11 @@ public class BankCardServiceImpl implements BankCardService {
     @Override
     public Optional<BankCard> findBankCardByCardNumber(String cardNumber) {
         return bankCardRepository.findBankCardByCardNumber(cardNumber);
+    }
+
+    @Override
+    public Page<BankCard> getBankCards(int startIndex, int size) {
+        Pageable pageable = PageRequest.of(startIndex, size);
+        return bankCardRepository.getBankCards(pageable);
     }
 }
